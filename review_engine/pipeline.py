@@ -8,10 +8,11 @@
 调用关系（与 form_validation_term_ref_rules_summary.txt 一致）：
     1. 先处理“术语和定义”章节，得到术语条目及其“来源”标准集合；
     2. 再处理“规范性引用文件”章节，将术语“来源”标准集合传入，
-       用于 A4R012 / FVT006 联动检查（仅出现在术语来源中的标准
+       用于 FVT006 / A4R012 联动检查（仅出现在术语来源/定义中的标准
        不应列入规范性引用文件）；
     3. 在主函数中显式实现两章节联动（术语“来源”标准若同时出现在
-       规范性引用文件列表中，则分别在术语章节与引用文件章节给出批注）。
+       规范性引用文件列表中，则批注锚定在“规范性引用文件”章节的对应
+       引用条目上，而非术语章节——修改动作发生在引用章节）。
 
 用法：
     python 审核主控.py <input.docx> [-o JSON] [--docx-out ...] [--xlsx-out ...] [--no-comments]
@@ -90,9 +91,11 @@ def _locate_chapter(items, titles, allowed_in_chapter):
 
 def linkage_term_source_vs_references(terms_chapter, refs_chapter,
                                        para_objects_terms) -> List[AuditIssue]:
-    """FVT006 / A4R012：术语“来源”中的标准若同时列入规范性引用文件，给出批注。
+    """FVT006 / A4R012：术语“来源”/定义中的标准若同时列入规范性引用文件，给出批注。
 
-    该联动逻辑放在主函数中：批注锚定到术语条目所在段落（术语章节侧）。
+    该联动的修改动作发生在“规范性引用文件”章节（把该标准移出规范性引用文件、
+    放入参考文献），因此批注锚定到对应的**引用条目**段落（规范性引用文件章节侧），
+    而非术语条目。规则名以「规范性引用文件-」开头，会被归入引用章节批注。
     """
     issues: List[AuditIssue] = []
     if not terms_chapter or not refs_chapter:
@@ -100,16 +103,20 @@ def linkage_term_source_vs_references(terms_chapter, refs_chapter,
     ref_codes: Set[str] = {e.code for e in refs_chapter.entries if e.code}
     if not ref_codes:
         return issues
+    # 标准代号 -> 引用条目，用于把批注锚定到“规范性引用文件”章节
+    ref_by_code = {e.code: e for e in refs_chapter.entries if e.code}
 
     for entry in terms_chapter.entries:
         for code in extract_std_codes(entry.definition):
             if code in ref_codes:
+                ref_entry = ref_by_code.get(code)
+                anchor_idx = ref_entry.paragraph_index if ref_entry else -2
                 issues.append(AuditIssue(
-                    rule="术语和定义-来源联动",
-                    location=f"术语'{entry.name_cn or entry.raw_text}'（来源标准：{code}）",
+                    rule="规范性引用文件-来源联动",
+                    location=f"引用条目（来源标准：{code}；术语'{entry.name_cn or entry.raw_text}'）",
                     description="该标准出现在术语和定义章节中，不应放在规范性引用文件中，应放在参考文献章节中",
                     suggestion="将该标准从第二章“规范性引用文件”中移除，放入“参考文献”章节",
-                    paragraph_index=entry.paragraph_index,
+                    paragraph_index=anchor_idx,
                 ))
                 break
     return issues
@@ -248,16 +255,11 @@ def audit_document(docx_path: str):
     )
     all_issues.extend(struct_issues)
 
-    # 按章节拆分，便于回写批注时各自锚定
-    terms_related = [i for i in all_issues
-                     if i.rule.startswith("术语和定义") or i.rule.startswith("章节-术语和定义")
-                     or i.rule == "术语和定义-来源联动"
-                     or (i.rule.startswith("章节-结构顺序"))]
+    # 按章节拆分，便于回写批注时各自锚定：
+    # - “规范性引用文件-*”类问题（含「来源联动」）写入引用章节批注；
+    # - 其余（术语章节问题、章节顺序提示等）写入术语章节批注。
     refs_related = [i for i in all_issues
                     if i.rule.startswith("规范性引用文件")]
-    # 其余（如跨章节 info）归入术语侧一并回写
-    terms_side = [i for i in all_issues if i in terms_related or i not in refs_related]
-    # 简化：terms_side 含全部非 refs 类问题；refs_side 仅 refs 类
     terms_side = [i for i in all_issues if i not in refs_related]
 
     return {

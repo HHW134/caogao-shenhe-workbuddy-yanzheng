@@ -23,3 +23,6 @@ samples/*.xlsx
 Thumbs.db
 ~$*.docx
 ~$*.xlsx
+
+# 本地项目记忆（非仓库内容，不入库）
+.workbuddy/

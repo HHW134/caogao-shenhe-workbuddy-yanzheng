@@ -271,7 +271,6 @@ class ReferenceAuditor:
         self._check_year_format()            # A4R008
         self._check_forbidden_marks()        # A4R009
         self._check_body_citation()          # A4R010 / A4R011 / A4R013 / A4R014
-        self._check_source_only_linkage()    # A4R012（联动）
         return self.issues
 
     def _add(self, rule, location, description, suggestion,
@@ -520,25 +519,6 @@ class ReferenceAuditor:
                     suggestion="在第二章补充该标准条目",
                     paragraph_index=-1,
                 )
-
-    def _check_source_only_linkage(self):  # A4R012（联动）
-        """标准仅在术语“来源”中提及，却列入规范性引用文件。
-
-        入参 terms_source_standards 为术语章节解析出的“来源”标准基础代号集合，
-        由主控文件传入（两章节联动）。
-        """
-        if not self.terms_source_standards:
-            return
-        for e in self.chapter.entries:
-            if e.code and e.code in self.terms_source_standards:
-                self._add(
-                    rule="规范性引用文件-来源联动",
-                    location=f"引用条目：{e.raw_text}",
-                    description="该标准仅在“来源”中提及，不应放在规范性引用文件中，应放在参考文献章节中",
-                    suggestion="将该标准从规范性引用文件移至参考文献",
-                    paragraph_index=e.paragraph_index,
-                )
-
 
 # ---------------------------------------------------------------------------
 # 便捷入口

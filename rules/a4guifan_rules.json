@@ -1,0 +1,152 @@
+[
+  {
+    "rule_id": "A4R001",
+    "category": "章节-规范性引用文件",
+    "rule_name": "规范性引用文件章节缺失或结构错误",
+    "trigger_condition": "文档目录/章节顺序中未识别到“规范性引用文件”章节，或解析该章节时发生异常（章节缺失、格式错误、无法定位内容）。",
+    "comment_text": "若没有规范性引用文件需要保留第2章并给出引导语：本文件没有规范性引用文件",
+    "how_to_fix": "检查规范性引用文件章节是否缺失，格式是否错误。若没有规范性引用文件需要保留第2章并给出引导语：本文件没有规范性引用文件。",
+    "source_function": "audit_references_of_contents / form_validation_test 调用入口",
+    "severity": "高"
+  },
+  {
+    "rule_id": "A4R002",
+    "category": "章节-规范性引用文件",
+    "rule_name": "规范性引用文件章节格式错误（表格形式）",
+    "trigger_condition": "规范性引用文件章节内容被识别为表格（文本中包含 $$ 等表格占位符）。",
+    "comment_text": "规范性引用文件章节格式错误，不应使用表格形式呈现",
+    "how_to_fix": "将规范性引用文件改为普通段落列表形式，不要使用表格排版。",
+    "source_function": "audit_references_of_contents",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R003",
+    "category": "章节-规范性引用文件",
+    "rule_name": "规范性引用文件引导语缺失或错误",
+    "trigger_condition": "存在引用文件时，缺少标准引导语；或无引用文件时未使用“本文件没有规范性引用文件”；或存在引用文件却出现“本文件没有规范性引用文件”。",
+    "comment_text": "规范性引用文件缺少标准引导语 / 无引用文件时未保留第2章并注明“本文件没有规范性引用文件” / 有引用文件时不应出现“本文件没有规范性引用文件”",
+    "how_to_fix": "存在引用文件时，在章节开头加入：下列文件中的内容通过文中的规范性引用而构成本文件必不可少的条款。其中，注日期的引用文件，仅该日期对应的版本适用于本文件；不注日期的引用文件，其最新版本（包括所有的修改单）适用于本文件。无引用文件时，保留第2章并只写：本文件没有规范性引用文件。",
+    "source_function": "audit_references_of_contents",
+    "severity": "高"
+  },
+  {
+    "rule_id": "A4R004",
+    "category": "章节-规范性引用文件",
+    "rule_name": "引用文件条目排序错误",
+    "trigger_condition": "规范性引用文件条目未按：国家标准→行业标准→地方标准→团体标准→ISO/IEC/ITU→其他机构→其他文献 的顺序排列，或同类型内未按标准号从小到大排列。",
+    "comment_text": "规范性引用文件排序错误",
+    "how_to_fix": "按以下顺序重新排列引用文件：国家标准（GB、GB/T）→行业标准（如 YD/T、HG/T 等）→地方标准（DB）→团体标准（T/）→ISO/IEC/ITU 国际标准→其他机构标准→其他文献。同类型内按标准编号从小到大排序，并跳过占位符条目（如 GB/T XXXX-XXXX）。",
+    "source_function": "check_standard_order",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R005",
+    "category": "章节-规范性引用文件",
+    "rule_name": "引用文件缺少标准发布编号",
+    "trigger_condition": "引用条目无法提取出标准编号（category 6：仅有名称而无编号）。",
+    "comment_text": "引用的文件应使用标准发布编号及标准发布名称",
+    "how_to_fix": "为每个引用文件补充标准发布编号，格式如：GB/T XXXXX—YYYY 名称。",
+    "source_function": "audit_references_of_contents（category 6）",
+    "severity": "高"
+  },
+  {
+    "rule_id": "A4R006",
+    "category": "章节-规范性引用文件",
+    "rule_name": "国际/国内引用文件格式错误",
+    "trigger_condition": "国际标准条目（ISO/IEC/ITU 等，category 4/5）未以“标准发布号 中文名称（英文名称）”结尾；国内标准条目（category 0-3）错误地以“（英文）”结尾。",
+    "comment_text": "国际引用文件应为：标准发布号 中文（英文）的结尾格式；国内引用文件不应以（英文）结尾",
+    "how_to_fix": "国际标准条目示例：ISO/IEC 12345:2020 信息技术 通用规范（Information technology — Generic specification）。国内标准条目示例：GB/T 12345—2020 信息技术 通用规范。",
+    "source_function": "audit_references_of_contents",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R007",
+    "category": "章节-规范性引用文件",
+    "rule_name": "国际文件缺少国际组织代号",
+    "trigger_condition": "国际标准编号以 H. 开头但缺少应有的国际组织代号（如 ITU-T、ISO/IEC 等）。",
+    "comment_text": "国际引用文件缺少国际组织代号",
+    "how_to_fix": "补充国际组织代号，如 ITU-T H.XXX、ISO/IEC H.XXX 等。",
+    "source_function": "audit_references_of_contents",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R008",
+    "category": "章节-规范性引用文件",
+    "rule_name": "引用文件年份号格式错误",
+    "trigger_condition": "引用条目中年份号使用“X-X”等非标准格式，未使用“XXXX-XXXX”格式。",
+    "comment_text": "引用文件年份号格式错误",
+    "how_to_fix": "将年份号改为四位数-四位数格式，如 GB/T 12345—2020。",
+    "source_function": "audit_references_of_contents",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R009",
+    "category": "章节-规范性引用文件",
+    "rule_name": "引用文件条目包含多余序号或标点符号",
+    "trigger_condition": "引用条目前面出现“1.”、“(2)”、“3、”等人工序号前缀，或条目中包含书名号、引号等标点。",
+    "comment_text": "引用文件不应有序号前缀，也不应使用书名号、引号等符号",
+    "how_to_fix": "删除引用条目前的人工序号、书名号《》、引号“”等符号，仅保留标准编号和名称。",
+    "source_function": "audit_references_of_contents",
+    "severity": "低"
+  },
+  {
+    "rule_id": "A4R010",
+    "category": "正文-规范性引用",
+    "rule_name": "规范性引用文件在正文中未被引用",
+    "trigger_condition": "某标准列在规范性引用文件中，但在正文段落中未出现；或出现但未使用“应遵循、应按照、应符合、按照、符合、应满足、满足、按、应达到、达到、遵守、使用、应遵守、应使用”等规范性措辞。",
+    "comment_text": "该标准在正文中未被正确引用，请检查正文是否需要引用该标准，或从规范性引用文件中移除",
+    "how_to_fix": "在正文中合适位置引用该标准（使用应遵循、应符合、按照、满足等措辞），或将该标准从规范性引用文件中移除。",
+    "source_function": "check_standard_usage",
+    "severity": "高"
+  },
+  {
+    "rule_id": "A4R011",
+    "category": "正文-规范性引用",
+    "rule_name": "标准仅在“注”中提及却列入规范性引用文件",
+    "trigger_condition": "某标准仅在正文“注”段落中出现，且被列在规范性引用文件中。",
+    "comment_text": "该标准仅在“注”中提及，不应放在规范性引用文件中，应放在参考文献章节中",
+    "how_to_fix": "将该标准从规范性引用文件中移除，放入参考文献章节。",
+    "source_function": "check_standard_usage",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R012",
+    "category": "正文-规范性引用",
+    "rule_name": "标准仅在“来源”中提及却列入规范性引用文件",
+    "trigger_condition": "某标准仅在术语“来源”字段中出现，且被列在规范性引用文件中。",
+    "comment_text": "该标准仅在“来源”中提及，不应放在规范性引用文件中，应放在参考文献章节中",
+    "how_to_fix": "将该标准从规范性引用文件中移除，放入参考文献章节。",
+    "source_function": "check_standard_usage",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R013",
+    "category": "正文-规范性引用",
+    "rule_name": "正文引用标准与规范性引用文件条目不一致",
+    "trigger_condition": "正文段落中出现的标准编号与规范性引用文件中的条目不一致（如正文中多写年代号、省略编号、使用旧称等）。",
+    "comment_text": "正文中引用的标准编号与规范性引用文件中的条目不一致",
+    "how_to_fix": "核对正文中的标准编号与规范性引用文件条目，确保二者完全一致。",
+    "source_function": "check_standard_usage / is_substring_after_clean",
+    "severity": "中"
+  },
+  {
+    "rule_id": "A4R014",
+    "category": "正文-规范性引用",
+    "rule_name": "正文有规范性引用但未在第二章列出",
+    "trigger_condition": "正文段落中使用了规范性措辞引用标准，但该标准未在“规范性引用文件”章节中出现。",
+    "comment_text": "正文有规范性引用文件，需要在第二章给出规范性引用",
+    "how_to_fix": "在第二章“规范性引用文件”中补充该标准条目。",
+    "source_function": "audit_references_of_contents",
+    "severity": "高"
+  },
+  {
+    "rule_id": "A4R015",
+    "category": "正文-规范性引用",
+    "rule_name": "引用文件编号排序/解析异常",
+    "trigger_condition": "从标准文本中提取编号失败，或出现占位符（XXXX/XXXX-XXXX/XXXX:XXXX）等无法排序的情况。",
+    "comment_text": "引用文件编号无法解析或为占位符，请核对编号格式",
+    "how_to_fix": "将占位符替换为真实标准编号，确保编号格式可被解析。",
+    "source_function": "extract_standard_number",
+    "severity": "中"
+  }
+]

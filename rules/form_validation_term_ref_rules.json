@@ -1,0 +1,90 @@
+[
+  {
+    "rule_id": "FVT001",
+    "category": "章节-术语和定义",
+    "rule_name": "术语和定义（或术语、定义和缩略语）章节处理异常/结构错误",
+    "trigger_condition": "目录中识别到“术语和定义”或“术语、定义和缩略语”章节，但调用 audit_terms_of_contents 解析时发生异常（章节缺失、格式错误、无法定位内容）。",
+    "comment_text": "术语和定义章节结构错误（若为合并章节则提示：术语、定义和缩略语章节结构错误）",
+    "how_to_fix": "检查术语相关章节是否缺失，格式是否错误。若没有术语和定义需要保留第3章并给出引导语：本文件没有术语和定义。",
+    "source_function": "form_validation_test.py 主流程调用 audit_terms_of_contents",
+    "interaction_with_reference": "术语章节解析结果 terms_and_definitions_text 会作为参数传递给规范性引用文件审核函数 audit_references_of_contents，用于判断标准是否仅在术语来源中出现。",
+    "severity": "高"
+  },
+  {
+    "rule_id": "FVT002",
+    "category": "章节-术语和定义",
+    "rule_name": "术语和定义章节名称描述错误",
+    "trigger_condition": "目录中存在含“术语”或“定义”字样的章节，但 chapter_order 中未匹配到标准名称“术语和定义”或“术语、定义和缩略语”。",
+    "comment_text": "“术语和定义“章节名称描述错误，请更改章节名称",
+    "how_to_fix": "检查并修改术语章节名称，标准名称应为“术语和定义”或“术语、定义和缩略语”。",
+    "source_function": "form_validation_test.py 主流程（else 分支）",
+    "interaction_with_reference": "章节名称修正后，才能正确触发后续术语与规范性引用文件的联动检查。",
+    "severity": "中"
+  },
+  {
+    "rule_id": "FVT003",
+    "category": "章节-术语和定义",
+    "rule_name": "术语和定义类章节包含二级目次",
+    "trigger_condition": "目次中“术语和定义”类章节（术语和定义、术语、定义和术语、术语、定义和缩略语）下方出现二级编号（如 3.1、3.2）。",
+    "comment_text": "术语和定义类章节不应包含二级目次",
+    "how_to_fix": "删除术语和定义章节下的二级目次，术语条目应直接以条目形式呈现，不再细分二级标题。",
+    "source_function": "check_terms_like_chapter_has_no_subsections",
+    "interaction_with_reference": "术语章节结构规范是后续提取术语来源信息的前提，结构错误会影响与规范性引用文件的重复判定。",
+    "severity": "中"
+  },
+  {
+    "rule_id": "FVT004",
+    "category": "章节-术语和定义",
+    "rule_name": "术语和定义章节缺失",
+    "trigger_condition": "文档目录/章节顺序中既未识别到“术语和定义”，也未识别到“术语、定义和缩略语”，且目录中无含“术语”或“定义”字样的章节。",
+    "comment_text": "术语和定义章节结构错误",
+    "how_to_fix": "保留第3章并给出引导语：本文件没有术语和定义。",
+    "source_function": "form_validation_test.py 主流程（else 分支）",
+    "interaction_with_reference": "术语章节缺失时，terms_and_definitions_text 为空，规范性引用文件审核不再执行“来源重复”判定。",
+    "severity": "高"
+  },
+  {
+    "rule_id": "FVT005",
+    "category": "章节-规范性引用文件",
+    "rule_name": "规范性引用文件章节处理异常/缺失",
+    "trigger_condition": "目录中未识别到“规范性引用文件”章节，或调用 audit_references_of_contents 解析时发生异常。",
+    "comment_text": "若没有规范性引用文件需要保留第2章并给出引导语：本文件没有规范性引用文件",
+    "how_to_fix": "检查规范性引用文件章节是否缺失，格式是否错误。若没有规范性引用文件需要保留第2章并给出引导语：本文件没有规范性引用文件。",
+    "source_function": "form_validation_test.py 主流程调用 audit_references_of_contents",
+    "interaction_with_reference": "规范性引用文件解析结果 refs_section_para 与术语章节结果 terms_section_para 共同用于“来源重复”联动检查。",
+    "severity": "高"
+  },
+  {
+    "rule_id": "FVT006",
+    "category": "联动规则-术语来源与规范性引用",
+    "rule_name": "出现在术语“来源”中的标准不应列入规范性引用文件",
+    "trigger_condition": "某标准同时出现在规范性引用文件列表和术语定义的“来源”字段中（当前代码中该检查被注释，但规则意图保留）。",
+    "comment_text": "该标准出现在术语和定义章节中，不应放在规范性引用文件中，应放在参考文献章节中",
+    "how_to_fix": "将该标准从第二章“规范性引用文件”中移除，放入“参考文献”章节。",
+    "source_function": "form_validation_test.py 主流程（注释块，约 1708-1727 行）",
+    "interaction_with_reference": "核心联动规则：术语定义的来源标准属于资料性引用，不应与规范性引用文件混用。",
+    "severity": "中"
+  },
+  {
+    "rule_id": "FVT007",
+    "category": "章节结构-顺序",
+    "rule_name": "术语和定义章节在附录后出现的合法性",
+    "trigger_condition": "文档附录之后允许出现“参考文献、索引、图目录、表目录、术语和定义”等章节。",
+    "comment_text": "（结构提示）术语和定义章节位置需符合标准结构要求",
+    "how_to_fix": "确保术语和定义章节位于标准规定的合理位置（通常在前言、范围、规范性引用文件之后）。",
+    "source_function": "form_validation_test.py（allowed_after_appendix 列表）",
+    "interaction_with_reference": "术语章节通常位于规范性引用文件之后，二者顺序固定。",
+    "severity": "低"
+  },
+  {
+    "rule_id": "FVT008",
+    "category": "章节-术语、定义和缩略语",
+    "rule_name": "合并章节“术语、定义和缩略语”处理异常",
+    "trigger_condition": "文档使用合并章节“术语、定义和缩略语”，但解析时发生异常。",
+    "comment_text": "术语、定义和缩略语章节结构错误",
+    "how_to_fix": "检查合并章节是否缺失，格式是否错误。若没有术语和定义需要保留第3章并给出引导语：本文件没有术语和定义。",
+    "source_function": "form_validation_test.py 主流程（if \"术语、定义和缩略语\" in chapter_order 分支）",
+    "interaction_with_reference": "合并章节中的术语来源信息同样会传递给规范性引用文件审核流程。",
+    "severity": "高"
+  }
+]

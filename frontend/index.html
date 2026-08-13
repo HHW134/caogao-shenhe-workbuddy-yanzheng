@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>草案审核 WorkBuddy 验证</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">审</div>
+    <div>
+      <h1>草案审核 WorkBuddy 验证</h1>
+      <p>标准草案 docx 自动审核 · 术语与引用联动 · 规则外置可配置</p>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="review">文档审核</button>
+    <button class="tab" data-tab="rules">规则中心</button>
+    <button class="tab" data-tab="history">历史记录</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ============ 文档审核 ============ -->
+  <section id="panel-review" class="panel active">
+    <div class="layout">
+      <aside class="side">
+        <div class="card">
+          <h2>1. 上传草案</h2>
+          <div id="drop" class="drop">
+            <div class="drop-icon">＋</div>
+            <p class="drop-title">拖拽 .docx 到此处</p>
+            <p class="drop-sub">或点击选择文件</p>
+            <input type="file" id="file" accept=".docx" hidden>
+          </div>
+          <div id="fileinfo" class="fileinfo hidden"></div>
+        </div>
+
+        <div class="card">
+          <h2>2. 选择审核模块</h2>
+          <div id="modules" class="modules"></div>
+        </div>
+
+        <button id="run" class="primary" disabled>开始审核</button>
+        <div id="status" class="status"></div>
+      </aside>
+
+      <div class="content">
+        <div id="empty" class="empty">
+          <div class="empty-icon">📄</div>
+          <h3>尚未执行审核</h3>
+          <p>上传标准草案 docx，选择审核模块后点击「开始审核」。<br>
+             系统会输出问题清单，并把每条问题以 Word 批注写回文档。</p>
+        </div>
+
+        <div id="result" class="hidden">
+          <div class="stats" id="stats"></div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>审核问题清单</h2>
+              <div class="filters">
+                <select id="f-level">
+                  <option value="">全部级别</option>
+                  <option value="error">错误</option>
+                  <option value="warning">警告</option>
+                  <option value="info">提示</option>
+                </select>
+                <select id="f-module"><option value="">全部模块</option></select>
+                <input id="f-kw" type="search" placeholder="搜索问题 / 位置 / 要点">
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table id="issues">
+                <thead>
+                  <tr>
+                    <th style="width:52px">#</th>
+                    <th style="width:150px">审核要点</th>
+                    <th style="width:70px">级别</th>
+                    <th>问题</th>
+                    <th style="width:200px">位置</th>
+                    <th style="width:230px">修改建议</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="tablefoot" id="tablefoot"></p>
+          </div>
+
+          <div class="card">
+            <h2>产物下载</h2>
+            <div id="downloads" class="downloads"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 规则中心 ============ -->
+  <section id="panel-rules" class="panel">
+    <div class="card">
+      <div class="card-head">
+        <h2>规则库</h2>
+        <input id="r-kw" type="search" placeholder="搜索规则">
+      </div>
+      <div id="rulefiles" class="rulefiles"></div>
+      <div class="table-wrap">
+        <table id="rules-table">
+          <thead>
+            <tr>
+              <th style="width:90px">编号</th>
+              <th style="width:150px">分类</th>
+              <th style="width:220px">审核要点</th>
+              <th>问题 / 批注文案</th>
+              <th style="width:230px">修改建议</th>
+              <th style="width:70px">级别</th>
+              <th style="width:70px">状态</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="tablefoot" id="rulefoot"></p>
+    </div>
+  </section>
+
+  <!-- ============ 历史记录 ============ -->
+  <section id="panel-history" class="panel">
+    <div class="card">
+      <div class="card-head">
+        <h2>历史审核</h2>
+        <button id="refresh-history" class="ghost">刷新</button>
+      </div>
+      <div id="history" class="history"></div>
+    </div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# 运行产物（每次审核生成，不入库）
+runs/
+output/
+*.tmp
+
+# 真实业务草案与审核结果不入库（仓库公开，避免泄露未发布标准内容）
+samples/*.docx
+samples/*.xlsx
+!samples/README.md
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+~$*.docx
+~$*.xlsx

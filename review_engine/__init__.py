@@ -59,6 +59,11 @@ DEFAULT_MODULES = ("chapters",)
 SKIP_DOCX_COMMENT_RULES = {
     "规范性引用文件-来源联动",
 }
+# 下列规则「完全不输出」：既不写 docx 批注，也不进问题清单（xlsx / 前端表格）。
+# 用户确认属于误报 / 多余提示、希望彻底隐藏时加入此集合。
+SUPPRESSED_RULES = {
+    "规范性引用文件-来源联动",
+}
 
 # 「高/中/低」→ error/warning/info
 _SEVERITY_MAP = {"高": "error", "中": "warning", "低": "info"}
@@ -90,6 +95,8 @@ def _run_chapters(docx_path: str, out_dir: Path, stem: str, write_docx: bool):
     result = pipeline.audit_document(docx_path)
     records = []
     for issue in result["all_issues"]:
+        if issue.rule in SUPPRESSED_RULES:
+            continue
         d = issue.to_dict()
         records.append({
             "模块": "chapters",

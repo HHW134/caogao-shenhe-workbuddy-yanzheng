@@ -365,33 +365,8 @@ def audit(document, rules_by_id):
             if "（英文）" in text or re.search(r"[（(]英文[）)]", text):
                 add("A4R006", para, text[:60], "国内引用文件不应以（英文）结尾")
 
-    # ---- A4R004: 排序 ----
-    if len(parsed_entries) >= 2:
-        order_pairs = []
-        ok = True
-        for pe in parsed_entries:
-            code = pe["code"]
-            if code is None:
-                continue
-            tier, _ = classify(code["prefix"])
-            try:
-                num = float(code["number"])
-            except (TypeError, ValueError):
-                num = 0.0
-            order_pairs.append((tier, num, pe))
-        sorted_pairs = sorted(order_pairs, key=lambda x: (x[0], x[1]))
-        if [id(p[2]) for p in order_pairs] != [id(p[2]) for p in sorted_pairs]:
-            # 找到第一个失序条目
-            first_bad = None
-            for i in range(1, len(order_pairs)):
-                if (order_pairs[i][0], order_pairs[i][1]) < \
-                   (order_pairs[i - 1][0], order_pairs[i - 1][1]):
-                    first_bad = order_pairs[i][2]
-                    break
-            add("A4R004", first_bad["para"] if first_bad else parsed_entries[0]["para"],
-                "引用文件未按规范顺序排列")
-
     # ---- 正文引用关系: A4R010/011/012/013/014 ----
+    # 注：A4R004 排序检查已按要求移除，不再对引用文件做顺序提示。
     # 收集条目 base 编码集合
     ref_bases = {}  # base -> pe
     for pe in parsed_entries:

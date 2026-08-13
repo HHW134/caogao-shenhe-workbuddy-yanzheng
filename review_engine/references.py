@@ -62,9 +62,14 @@ INTL_PREFIXES = ("ISO", "IEC", "ITU", "ISO/IEC", "3GPP", "IEEE")
 # 机构代号之后允许两种形式：
 #   - 数字型：GB/T 12345—2020、YD/T 1990-2023
 #   - 字母.数字型（国际电联等）：ITU-T M.3010、ITU-T H.621、ISO/IEC 21827:2022
+# 行业代号前缀按 GB/T 1.1 常见写法补全（SJ/T、JB/T、HG/T、YY/T、QB/T、CJJ、JGJ …），
+# 末尾以 [A-Z]{2,5}(?:/[A-Z]{1,3})? 通配兜底，避免大量行业标准被漏识别。
 STD_CODE_RE = re.compile(
-    r"(?:GB|GB/T|GBZ|GBZ/T|DL/T|YD/T|DB\d{2}/T|DB\d{2}|Q/GDW|T/[A-Za-z]+|"
-    r"IEEE|ISO|IEC|ISO/IEC|ITU-T|ITU-R|ITU|3GPP)\s*"
+    r"(?:GB|GB/T|GB/Z|GBZ|GBZ/T|DL/T|YD/T|DB\d{2}/T|DB\d{2}|Q/GDW|Q/[A-Z]{1,4}|T/[A-Za-z]+|"
+    r"IEEE|ISO|IEC|ISO/IEC|ITU-T|ITU-R|ITU|3GPP|"
+    r"SJ/T|JB/T|HG/T|QB/T|QC/T|CJ/T|YY/T|FZ/T|MT/T|NB/T|NY/T|SC/T|SL/T|SN/T|TB/T|TD/T|TY/T|"
+    r"HB|JC|JG|JT|HJ|YS|YC|WB|WH|WM|WW|XB|YB|ZB|GJB|GA|GM|SB|SY|CJJ|JGJ|AQ|BB|CB|LD|LY|MH|RB|SH|"
+    r"[A-Z]{2,5}(?:/[A-Z]{1,3})?)\s*"
     r"(?:[A-Z]\.\d[\d.]*|\d[\w.]*(?:[.—-]\d{2,6})?(?::\d{4})?)"
 )
 
@@ -126,7 +131,8 @@ def is_international(code: str) -> bool:
 class ReferenceEntry:
     """解析出的规范性引用文件条目。"""
     raw_text: str = ""            # 原始文本（整段）
-    code: str = ""                # 归一化基础代号
+    codes: List[str] = field(default_factory=list)  # 归一化基础代号列表（单段可含多个）
+    code: str = ""                # 首个归一化基础代号（兼容旧字段）
     has_number: bool = True       # 是否带标准发布编号
     category: int = 1             # 层级（classify_std）
     paragraph_index: int = -1     # 章节段落索引
@@ -213,6 +219,7 @@ class ReferenceParser:
             codes = extract_std_codes(text)
             entry = ReferenceEntry(
                 raw_text=text,
+                codes=codes,
                 code=codes[0] if codes else "",
                 has_number=bool(codes),
                 category=classify_std(codes[0]) if codes else 6,
@@ -264,7 +271,7 @@ class ReferenceAuditor:
         self._check_chapter_structure()      # A4R001
         self._check_table_format()           # A4R002
         self._check_guide_sentence()         # A4R003
-        self._check_sorting()                # A4R004 / A4R015
+        self._check_placeholder()           # A4R015（排序检查 A4R004 已移除）
         self._check_missing_number()         # A4R005
         self._check_intl_domestic_format()   # A4R006
         self._check_missing_org_code()       # A4R007
@@ -344,12 +351,12 @@ class ReferenceAuditor:
                     paragraph_index=self.chapter.guide_paragraph_index,
                 )
 
-    def _check_sorting(self):  # A4R004 / A4R015
+    def _check_placeholder(self):  # A4R015（排序检查 A4R004 已按要求移除）
+        """规范性引用文件排序检查(A4R004)已移除：不再对引用条目做层级/编号排序提示。
+        此处仅保留编号占位符(A4R015)检查。"""
         entries = self.chapter.entries
-        last_cat = -1
-        last_code = ""
         for e in entries:
-            if not e.code:  # A4R015：编号无法解析
+            if not e.code:  # A4R015：编号无法解析（占位符）
                 if REF_PLACEHOLDER_RE.search(e.raw_text):
                     self._add(
                         rule="规范性引用文件-编号",
@@ -358,28 +365,6 @@ class ReferenceAuditor:
                         suggestion="替换为真实标准编号",
                         paragraph_index=e.paragraph_index,
                     )
-                continue
-            # 同类型内未按编号升序（best-effort）
-            if e.category == last_cat and last_code:
-                if e.code.upper() < last_code.upper():
-                    self._add(
-                        rule="规范性引用文件-排序",
-                        location=f"引用条目：{e.raw_text}",
-                        description="规范性引用文件排序错误（同类型内未按标准号从小到大排列）",
-                        suggestion="按规定的层级和编号顺序重新排列",
-                        paragraph_index=e.paragraph_index,
-                    )
-            # 层级不应回退
-            if last_cat >= 0 and e.category < last_cat:
-                self._add(
-                    rule="规范性引用文件-排序",
-                    location=f"引用条目：{e.raw_text}",
-                    description="规范性引用文件排序错误（层级顺序不符合规定）",
-                    suggestion="按 国家标准→行业标准→地方标准→团体标准→ISO/IEC/ITU→其他机构→其他文献 的顺序排列",
-                    paragraph_index=e.paragraph_index,
-                )
-            last_cat = e.category
-            last_code = e.code
 
     def _check_missing_number(self):  # A4R005
         for e in self.chapter.entries:

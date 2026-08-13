@@ -446,28 +446,7 @@ class NewRuleChecker:
             self._add(ref_paras[0][0], '规范性引用文件', '规范性引用文件-引导语',
                       '【规范性引用文件-引导语】规则要求：若文件中规范性引用了其他文件，必须在章标题下使用规定的标准引导语。当前缺少标准引导语。')
 
-        # 引用文件条目解析 + 排序检查
-        entries = []  # (para_idx, org, code, raw)
-        for i, t in ref_paras[1:]:
-            # 跳过明显非条目 (如纯说明)
-            m = re.match(r'^\s*([A-Za-z0-9/]+)\s+(RFC|TS|TR|IS)\s*([\d\.]+)', t)
-            if m:
-                org = m.group(1).upper()
-                entries.append((i, org, t))
-
-        # 排序: 按组织代号的拉丁字母/数字顺序，组织内按编号
-        # 标准期望: 数字开头(如3GPP)在组织字母(IETF)之前
-        if len(entries) > 1:
-            # 检查是否有 IETF 出现在 3GPP 之前
-            org_seq = [e[1] for e in entries]
-            # 找第一个 IETF 和第一个 3GPP 的位置
-            first_i = next((k for k, o in enumerate(org_seq) if o == 'IETF'), None)
-            first_3 = next((k for k, o in enumerate(org_seq) if o == '3GPP'), None)
-            if first_i is not None and first_3 is not None and first_i < first_3:
-                self._add(entries[first_3][0], '规范性引用文件', '规范性引用文件-排序规则',
-                          '【规范性引用文件-排序规则】规则要求：引用文件应按标准类型和编号重新排序。'
-                          '按组织代号（数字开头先于字母）排序时，3GPP（数字开头）应排在 IETF（字母开头）之前。'
-                          '当前 IETF RFC 文件排在 3GPP TS 文件之前，顺序不正确，请调整。')
+        # 注：规范性引用文件-排序规则 检查已按要求移除，不再对引用条目做顺序提示。
 
         # 引用文件不应使用表格格式 (本文无表格，跳过)
         # 引用文件不应含有书名号/引号

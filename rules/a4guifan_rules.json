@@ -30,16 +30,6 @@
     "severity": "高"
   },
   {
-    "rule_id": "A4R004",
-    "category": "章节-规范性引用文件",
-    "rule_name": "引用文件条目排序错误",
-    "trigger_condition": "规范性引用文件条目未按：国家标准→行业标准→地方标准→团体标准→ISO/IEC/ITU→其他机构→其他文献 的顺序排列，或同类型内未按标准号从小到大排列。",
-    "comment_text": "规范性引用文件排序错误",
-    "how_to_fix": "按以下顺序重新排列引用文件：国家标准（GB、GB/T）→行业标准（如 YD/T、HG/T 等）→地方标准（DB）→团体标准（T/）→ISO/IEC/ITU 国际标准→其他机构标准→其他文献。同类型内按标准编号从小到大排序，并跳过占位符条目（如 GB/T XXXX-XXXX）。",
-    "source_function": "check_standard_order",
-    "severity": "中"
-  },
-  {
     "rule_id": "A4R005",
     "category": "章节-规范性引用文件",
     "rule_name": "引用文件缺少标准发布编号",

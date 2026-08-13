@@ -53,6 +53,13 @@ MODULES = {
 
 DEFAULT_MODULES = ("chapters",)
 
+# 下列规则「只进入问题清单（xlsx / 前端表格），不写入 docx Word 批注」。
+# 适用于：结论类、联动提示类，用户不希望它们以修订评论形式回写文档，
+# 但仍要在问题清单中保留「问题 / 修改建议」供查阅。
+SKIP_DOCX_COMMENT_RULES = {
+    "规范性引用文件-来源联动",
+}
+
 # 「高/中/低」→ error/warning/info
 _SEVERITY_MAP = {"高": "error", "中": "warning", "低": "info"}
 _SEVERITY_ORDER = {"error": 0, "warning": 1, "info": 2}
@@ -101,12 +108,17 @@ def _run_chapters(docx_path: str, out_dir: Path, stem: str, write_docx: bool):
         out_docx = out_dir / f"{stem}_章节审核批注.docx"
         doc = result["doc"]
         wrote = False
-        if result["para_objects_terms"] or result["title_para_terms"]:
-            write_annotated_docx(doc, result["terms_issues"], result["para_objects_terms"],
+        # 过滤：SKIP_DOCX_COMMENT_RULES 中的规则只进清单，不写 Word 批注
+        terms_for_doc = [i for i in result["terms_issues"]
+                         if i.rule not in SKIP_DOCX_COMMENT_RULES]
+        refs_for_doc = [i for i in result["refs_issues"]
+                        if i.rule not in SKIP_DOCX_COMMENT_RULES]
+        if (result["para_objects_terms"] or result["title_para_terms"]) and terms_for_doc:
+            write_annotated_docx(doc, terms_for_doc, result["para_objects_terms"],
                                  result["title_para_terms"], str(out_docx), author="术语审核")
             wrote = True
-        if result["para_objects_refs"] or result["title_para_refs"]:
-            write_annotated_docx(doc, result["refs_issues"], result["para_objects_refs"],
+        if (result["para_objects_refs"] or result["title_para_refs"]) and refs_for_doc:
+            write_annotated_docx(doc, refs_for_doc, result["para_objects_refs"],
                                  result["title_para_refs"], str(out_docx), author="引用审核")
             wrote = True
         if not wrote:

@@ -252,6 +252,8 @@ class NewRuleChecker:
 
     def _add(self, para_idx, module, audit_point, comment, rule_question=''):
         """记录一条检测结果并注册批注"""
+        # 不在批注正文里展示「【审核要点】」前缀，仅保留问题正文（如「规则要求：…」）。
+        comment = re.sub(r'^【[^】]*】', '', comment)
         self.ann.add_comment(para_idx, comment)
         self.findings.append({
             'para_idx': para_idx,

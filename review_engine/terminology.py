@@ -829,12 +829,6 @@ def _is_top_level_heading(style: str, text: str, allowed_in_chapter: set) -> boo
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 COMMENTS_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments"
 
-# 下列规则的 docx 批注正文不展示「【规则名】[级别]」标签前缀，仅保留「问题 / 建议」。
-# 适用场景：结论性 / 联动提示类规则，用户希望批注看起来像普通修订意见而非系统标签。
-NO_PREFIX_RULES = {
-    "规范性引用文件-来源联动",
-}
-
 
 def _get_or_create_comments_part(doc):
     """获取或新建 comments.xml 部件（Word 批注容器）。"""
@@ -905,17 +899,10 @@ def _resolve_anchor(issue, para_objects, title_para):
 def _build_comment_lines(issue: AuditIssue) -> List[str]:
     """构造一条批注的正文行。
 
-    普通规则：首行展示「【规则名】[级别]」标签，便于在 Word 批注中快速识别来源。
-    列入 NO_PREFIX_RULES 的规则（如联动类提示）：去掉标签前缀，仅保留「问题 / 建议」正文，
-    使批注更贴近人工修订意见、不显突兀。
+    所有规则的 docx 批注正文都不展示「【规则名】[级别]」标签前缀，
+    仅保留「问题 / 建议 / 详情」正文，使批注更贴近人工修订意见、不显突兀。
     """
-    if issue.rule in NO_PREFIX_RULES:
-        return [
-            f"问题：{issue.description}",
-            f"建议：{issue.suggestion}",
-        ]
     lines = [
-        f"【{issue.rule}】[{issue.severity}]",
         f"问题：{issue.description}",
         f"建议：{issue.suggestion}",
     ]

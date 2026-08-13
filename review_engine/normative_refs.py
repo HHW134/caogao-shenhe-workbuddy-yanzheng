@@ -503,7 +503,8 @@ def apply_comments(document, issues, author):
             continue
         cid = next_id
         next_id += 1
-        body = "[%s] %s\n%s" % (it["rule_id"], it["rule_name"], it["comment_text"])
+        # 不在批注正文里展示「[规则编号] 规则名」前缀，仅保留问题正文与补充细节。
+        body = "%s" % it["comment_text"]
         if it.get("extra"):
             body += "\n（%s）" % it["extra"]
         comments.append({"id": cid, "text": body})

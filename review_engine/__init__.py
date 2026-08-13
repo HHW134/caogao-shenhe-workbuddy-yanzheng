@@ -53,11 +53,10 @@ MODULES = {
 
 DEFAULT_MODULES = ("chapters",)
 
-# 下列规则「只进入问题清单（xlsx / 前端表格），不写入 docx Word 批注」。
-# 适用于：用户不希望以 Word 修订评论形式回写、但仍要在问题清单保留「问题 / 修改建议」的规则。
-#
-# 注意：「规范性引用文件-来源联动」现已恢复为正常批注——docx 与问题清单都保留，
-# 仅其 docx 批注正文不展示「【规则名】[级别]」前缀（该控制见 terminology.py 的 NO_PREFIX_RULES）。
+# 所有模块的 docx 批注正文均不再展示「【规则名】[级别]」/「[规则编号] 规则名」/「【审核要点】」
+# 这类规则标签前缀，仅保留「问题 / 建议 / 详情」正文，使批注更贴近人工修订意见。
+# 该控制分别位于：terminology.py 的 _build_comment_lines()、normative_refs.py 的 apply_comments()、
+# fulldoc.py 的 _add()。
 SKIP_DOCX_COMMENT_RULES = set()
 
 # 「高/中/低」→ error/warning/info
